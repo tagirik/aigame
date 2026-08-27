@@ -31,6 +31,8 @@ const cardPool = [
   { id: 30, category: "Тестовые данные", title: "Подрядчик передал набор данных и назвал его тестовым, но происхождение данных не подтверждено", risk: "yellow", image: 6, rule: "Нет гарантии, что в наборе отсутствуют реальные сведения.", correctAction: "block" },
 ];
 
+const RESULTS_ENDPOINT = "https://script.google.com/macros/s/AKfycbyOrMMJASV9NJNziSRtfEtAzlbFrcOuo8oudnZ-Nhh5oKgzYw503U-UH70KYy_Y7P0/exec";
+
 const actions = [
   { id: "as-is", label: "Можно использовать как есть" },
   { id: "anonymize", label: "Удалить имена, контакты и идентификаторы" },
@@ -136,12 +138,17 @@ function resultData() {
 function renderResult() {
   const result = resultData();
   const mistakeHtml = result.mistakes.length ? result.mistakes.map(c => `<div><strong>${c.title}</strong><br>${c.rule}</div>`).join("<br>") : "Все карточки разобраны уверенно. Сохраните общий алгоритм перед загрузкой.";
-  app.innerHTML = `<div class="result-stage"><p class="result-kicker">Ваш результат</p><h3>${result.profile}</h3><div class="result-grid"><div class="score-card"><div class="score-number">${result.score}%</div><p>Результат показывает, насколько уверенно вы различаете свободные, условно допустимые и закрытые данные.</p></div><div class="checklist-card"><h4>Мой чек-лист</h4><ol class="checklist"><li>Минимизировать данные.</li><li>Проверить персональные и конфиденциальные сведения.</li><li>Обезличить или агрегировать жёлтую зону.</li><li>Проверить доступ и условия платформы.</li><li>Проверить ответ ИИ и сохранить ответственность.</li></ol><div class="mistakes"><strong>Мои зоны внимания</strong><br><br>${mistakeHtml}</div></div></div><div class="result-submit"><label for="company">Компания участника</label><input id="company" type="text" maxlength="120" required placeholder="Название компании"><p>В прототипе результат сохраняется на этом устройстве. После подключения таблицы эта кнопка будет передавать запись в общий рейтинг компаний.</p></div><div class="artifact-actions"><button class="artifact-button secondary" data-action="restart">Сыграть заново</button><button class="artifact-button" data-action="submit-result">Отправить результат</button></div><p class="submission-status" data-submission-status aria-live="polite"></p></div>`;
+  app.innerHTML = `<div class="result-stage"><p class="result-kicker">Ваш результат</p><h3>${result.profile}</h3><div class="result-grid"><div class="score-card"><div class="score-number">${result.score}%</div><p>Результат показывает, насколько уверенно вы различаете свободные, условно допустимые и закрытые данные.</p></div><div class="checklist-card"><h4>Мой чек-лист</h4><ol class="checklist"><li>Минимизировать данные.</li><li>Проверить персональные и конфиденциальные сведения.</li><li>Обезличить или агрегировать жёлтую зону.</li><li>Проверить доступ и условия платформы.</li><li>Проверить ответ ИИ и сохранить ответственность.</li></ol><div class="mistakes"><strong>Мои зоны внимания</strong><br><br>${mistakeHtml}</div></div></div><div class="result-submit"><label for="company">Компания участника</label><input id="company" type="text" maxlength="120" required placeholder="Название компании"></div><div class="artifact-actions"><button class="artifact-button secondary" data-action="restart">Сыграть заново</button><button class="artifact-button" data-action="submit-result">Отправить результат</button></div><p class="submission-status" data-submission-status aria-live="polite"></p></div>`;
 }
 
-function submitResult() {
+async function submitResult() {
   const input = document.querySelector("#company");
   if (!input.reportValidity() || !input.value.trim()) return;
+  const status = document.querySelector("[data-submission-status]");
+  const button = document.querySelector('[data-action="submit-result"]');
+  button.disabled = true;
+  button.textContent = "Отправляется…";
+  status.textContent = "Отправляем результат в общий рейтинг…";
   const result = resultData();
   const record = {
     id: globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`,
@@ -152,16 +159,24 @@ function submitResult() {
     profile: result.profile,
     playedAt: new Date().toISOString(),
   };
-  let records = [];
-  try { records = JSON.parse(localStorage.getItem("ai-risk-company-results") ?? "[]"); } catch { records = []; }
-  records.push(record);
-  localStorage.setItem("ai-risk-company-results", JSON.stringify(records));
-  window.dispatchEvent(new CustomEvent("ai-risk-result-submitted", { detail: record }));
-  const status = document.querySelector("[data-submission-status]");
-  status.textContent = "Результат сохранён. Он готов к передаче в таблицу после подключения интеграции.";
-  const button = document.querySelector('[data-action="submit-result"]');
-  button.disabled = true;
-  button.textContent = "Результат сохранён";
+  try {
+    await fetch(RESULTS_ENDPOINT, {
+      method: "POST",
+      mode: "no-cors",
+      body: new URLSearchParams(record),
+    });
+    let records = [];
+    try { records = JSON.parse(localStorage.getItem("ai-risk-company-results") ?? "[]"); } catch { records = []; }
+    records.push(record);
+    localStorage.setItem("ai-risk-company-results", JSON.stringify(records));
+    window.dispatchEvent(new CustomEvent("ai-risk-result-submitted", { detail: record }));
+    status.textContent = "Результат отправлен в общий рейтинг.";
+    button.textContent = "Результат отправлен";
+  } catch {
+    status.textContent = "Не удалось отправить результат. Проверьте интернет и попробуйте ещё раз.";
+    button.disabled = false;
+    button.textContent = "Отправить результат";
+  }
 }
 
 function resetGame() {
