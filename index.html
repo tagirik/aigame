@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#e8e8e8" />
+    <meta name="description" content="Свайп-игра о безопасной работе маркетолога с данными и внешними ИИ-сервисами." />
+    <meta property="og:title" content="Можно в ИИ? — ProductSense’26" />
+    <meta property="og:description" content="Проверьте, насколько хорошо вы распознаёте чувствительные данные." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="./og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <title>Можно в ИИ? — ProductSense’26</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#game">К игре</a>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="В начало">
+        <span class="brand-mark" aria-hidden="true">+</span>
+        <span>ProductSense’26</span>
+      </a>
+      <div class="event-meta"><span>10–11 сентября</span><span>Москва</span></div>
+      <div class="kontur-label">Контур × продуктовый маркетинг</div>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow"><span></span>Свайп-игра · 3–4 минуты</p>
+          <h1 id="hero-title">Можно<br /><em>в ИИ?</em></h1>
+          <p class="lead">Проверьте, насколько хорошо вы распознаёте чувствительные данные.</p>
+          <button class="start-button" id="start-button" type="button">Начать игру <span>↗</span></button>
+        </div>
+        <div class="hero-demo" aria-hidden="true">
+          <div class="demo-card">
+            <img class="demo-image" src="./situation-images/11.png" alt="" />
+            <span class="demo-tag">CRM</span>
+            <strong>Выгрузка с данными клиентов</strong>
+          </div>
+          <span class="demo-stamp red">НЕЛЬЗЯ</span>
+          <span class="demo-stamp yellow">ПАРКОВКА</span>
+          <span class="demo-stamp green">МОЖНО</span>
+        </div>
+      </section>
+
+      <section class="rules-strip" aria-label="Правила свайпов">
+        <div class="rule red"><span>←</span><strong>Нельзя</strong><small>во внешний ИИ</small></div>
+        <div class="rule yellow"><span>↑</span><strong>Доработать</strong><small>уточнить на парковке</small></div>
+        <div class="rule green"><span>→</span><strong>Можно</strong><small>без ограничений</small></div>
+      </section>
+
+      <section class="game-section" id="game" aria-labelledby="game-title">
+        <div class="section-heading">
+          <div>
+            <h2 id="game-title">Данные решают,<br />но решаете вы.</h2>
+          </div>
+        </div>
+        <div id="app-root" class="app-frame" aria-live="polite">
+          <noscript>Для игры нужен JavaScript.</noscript>
+        </div>
+      </section>
+
+      <section class="manifesto">
+        <p>ИИ делегируется задача.</p>
+        <p>Не ответственность.</p>
+        <span>+</span>
+      </section>
+    </main>
+
+    <footer>
+      <span>ProductSense’26 · Фундамент и эволюция</span>
+      <span>Прототип активности продуктового маркетинга Контура</span>
+    </footer>
+    <script src="./app.js" defer></script>
+  </body>
+</html>
